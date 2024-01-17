@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { combineReducers } from "redux"
+import { fetchThunk, setFilter } from "./features/todos"
 import TodoItem from "./components/todoItem"
 
 export const asyncMiddleware = (store) => (next) => (action) => {
@@ -8,18 +9,6 @@ export const asyncMiddleware = (store) => (next) => (action) => {
     return action(store.dispatch, store.getState)
   }
   return next(action)
-}
-
-export const fetchThunk = () => async dispatch => {
-  dispatch({ type: 'todos/pending' })
-  try{
-    const response = await fetch('https://jsonplaceholder.typicode.com/todos')
-    const data = await response.json()
-    const todos = data.slice(0, 10)
-    dispatch({ type: 'todos/fullfiled', payload: todos })
-  } catch(e) {
-    dispatch({ type: 'todos/error', error: e.message })
-  }
 }
 
 export const filterReducer = (state = 'all', action) => { //Actualizar filter
@@ -124,9 +113,9 @@ const App = () => {
       <form onSubmit={submit}>
         <input value={value} onChange={e => setValue(e.target.value)}/> 
       </form>
-      <button onClick={() => dispatch({ type: 'filter/set', payload: 'all' })} > Mostrar todos </button>
-      <button onClick={() => dispatch({ type: 'filter/set', payload: 'complete' })}> Completados</button>
-      <button onClick={() => dispatch({ type: 'filter/set', payload: 'incomplete' })}> Incompletos</button>
+      <button onClick={() => dispatch(setFilter('all'))}> Mostrar todos </button>
+      <button onClick={() => dispatch(setFilter('complete'))}> Completados</button>
+      <button onClick={() => dispatch(setFilter('incomplete'))}> Incompletos</button>
       <button onClick={() => dispatch(fetchThunk())}> Fetch </button>
       <ul>
         {todos.map(todo => 
