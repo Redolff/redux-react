@@ -3,7 +3,26 @@ import { useDispatch, useSelector } from "react-redux"
 import { combineReducers } from "redux"
 import TodoItem from "./components/todoItem"
 
-export const filterReducer = (state = 'all', action) => {
+export const asyncMiddleware = (store) => (next) => (action) => {
+  if(typeof action === 'function'){
+    return action(store.dispatch, store.getState)
+  }
+  return next(action)
+}
+
+export const fetchThunk = () => async dispatch => {
+  dispatch({ type: 'todos/pending' })
+  try{
+    const response = await fetch('https://jsonplaceholder.typicode.com/todos')
+    const data = await response.json()
+    const todos = data.slice(0, 10)
+    dispatch({ type: 'todos/fullfiled', payload: todos })
+  } catch(e) {
+    dispatch({ type: 'todos/error', error: e.message })
+  }
+}
+
+export const filterReducer = (state = 'all', action) => { //Actualizar filter
   switch(action.type){
     case 'filter/set': {
       return action.payload
@@ -14,8 +33,11 @@ export const filterReducer = (state = 'all', action) => {
   }
 }
 
-export const todosReducer = (state = [], action) => {
+export const todosReducer = (state = [], action) => { //Actualizar todos
   switch(action.type){
+    case 'todos/fullfiled': {
+      return action.payload
+    }
     case 'todo/add': {
       return state.concat({ ...action.payload })
     }
@@ -34,13 +56,36 @@ export const todosReducer = (state = [], action) => {
   }
 }
 
+const initialFetching = {loading: 'idle', error: null}
+export const fetchingReducer = (state = initialFetching, action) => {
+  switch(action.type){
+    case 'todos/pending': {
+      return {...state, loading: 'pending'}
+    }
+    case 'todos/fullfiled': {
+      return {...state, loading: 'succesed'}
+    }
+    case 'todos/error': {
+      return { error: action.error, loading: 'rejected'}
+    }
+    default: {
+      return state
+    }
+  }
+}
+
 export const reducer = combineReducers({
-  entities: todosReducer,
+  todos: combineReducers({
+    entities: todosReducer,
+    status: fetchingReducer,
+  }),
   filter: filterReducer,
 }) 
 
+const selectStatus = (state) => state.todos.status
+
 const selectTodos = state => {
-  const { entities, filter } = state
+  const { todos: { entities }, filter } = state
   if(filter === 'complete'){
     return entities.filter(x => x.completed)
   }
@@ -54,6 +99,7 @@ const App = () => {
   const [value, setValue] = useState('')
   const dispatch = useDispatch()
   const todos = useSelector(selectTodos)
+  const status = useSelector(selectStatus)
 
   const submit = (e) => {
     e.preventDefault()
@@ -66,6 +112,13 @@ const App = () => {
     setValue('')
   }
 
+  if(status.loading === 'pending') {
+    return <p> Cargando... </p>
+  }
+  if(status.loading === 'rejected'){
+    <p>{status.error}</p>
+  }
+
   return (
     <div>
       <form onSubmit={submit}>
@@ -74,6 +127,7 @@ const App = () => {
       <button onClick={() => dispatch({ type: 'filter/set', payload: 'all' })} > Mostrar todos </button>
       <button onClick={() => dispatch({ type: 'filter/set', payload: 'complete' })}> Completados</button>
       <button onClick={() => dispatch({ type: 'filter/set', payload: 'incomplete' })}> Incompletos</button>
+      <button onClick={() => dispatch(fetchThunk())}> Fetch </button>
       <ul>
         {todos.map(todo => 
           <TodoItem 
