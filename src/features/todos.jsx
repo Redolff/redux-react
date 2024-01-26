@@ -4,9 +4,8 @@ import { mat, mac, asyncMac, makeFetchingReducer, makeSetReducer, reduceReducers
 const asyncTodos = mat('todos')
 
 const [setPending, setFullfiled, setError] = asyncMac(asyncTodos)
-
+export const setComplete = mac('todo/complete', 'payload')
 export const setFilter = mac('filter/set', 'payload')
-export const setComplete = mac('todos/complete', 'payload')
 
 export const fetchThunk = () => async dispatch => {
     dispatch(setPending())
@@ -16,7 +15,7 @@ export const fetchThunk = () => async dispatch => {
         const todos = data.slice(0, 10)
         dispatch(setFullfiled(todos))
     } catch(e) {
-        dispatch(setError(e))
+        dispatch(setError(e.message))
     }
 }
 
@@ -34,7 +33,7 @@ const fullfiledReducer = makeSetReducer([
 
 const crudReducer = makeCrudReducer([    
     'todo/add',
-    'todo/complete'
+    'todo/complete',
 ])
 
 export const todosReducer = reduceReducers(crudReducer, fullfiledReducer)
@@ -52,10 +51,10 @@ export const reducer = combineReducers({
 export const selectTodos = state => {
     const { todos: { entities }, filter } = state
     if(filter === 'complete'){
-      return entities.filter(x => x.completed)
+      return entities.filter(todo => todo.completed)
     }
-    if(filter === 'incomplete'){
-      return entities.filter(x => !x.completed)
+    else if(filter === 'incomplete'){
+      return entities.filter(todo => !todo.completed)
     }
     return entities
 }

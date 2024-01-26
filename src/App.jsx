@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchThunk, setFilter, selectTodos, selectStatus } from "./features/todos"
-import TodoItem from "./components/todoItem"   
+import TodoItem from './components/TodoItem'
 
 const App = () => {
   const [value, setValue] = useState('')
@@ -26,16 +26,16 @@ const App = () => {
   if(status.loading === 'rejected'){
     <p>{status.error}</p>
   }
-
   return (
     <div>
       <form onSubmit={submit}>
         <input value={value} onChange={e => setValue(e.target.value)}/> 
       </form>
       <button onClick={() => dispatch(setFilter('all'))}> Mostrar todos </button>
-      <button onClick={() => dispatch(setFilter('complete'))}> Completados</button>
-      <button onClick={() => dispatch(setFilter('incomplete'))}> Incompletos</button>
+      <button onClick={() => dispatch(setFilter('complete'))}> Completados </button>
+      <button onClick={() => dispatch(setFilter('incomplete'))}> Incompletos </button>
       <button onClick={() => dispatch(fetchThunk())}> Fetch </button>
+      <h1> Lista de tareas: </h1>
       <ul>
         {todos.map(todo => 
           <TodoItem 

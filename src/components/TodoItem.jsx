@@ -3,7 +3,7 @@ import { setComplete } from "../features/todos"
 
 const TodoItem = ({ todo }) => {
     const dispatch = useDispatch()
-    
+
     return (
         <li
             style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}

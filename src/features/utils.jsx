@@ -1,10 +1,10 @@
 export const mat = entity => ([
     `${entity}/pending`,
     `${entity}/fullfiled`, 
-    `${entity}/rejected`
+    `${entity}/rejected`,
 ])
 
-export const mac = (type, ...argNames) =>
+export const mac = (type, ...argNames) => 
     (...args) => {
         const action = { type }
         argNames.forEach((arg, index) => {
@@ -58,10 +58,12 @@ export const makeCrudReducer = actions => (state = [], action) => { //Actualizar
         }
         case actions[1]: {
             const newEntities = state.map(entity => {
-            if(entity.id === action.payload.id){
-                return { ...entity, completed: !state.completed }
-            }
-            return entity
+                if(entity.id === action.payload.id){
+                    return { ...entity,
+                             completed: !entity.completed 
+                            }
+                }
+                return entity
             })
             return newEntities
         }
