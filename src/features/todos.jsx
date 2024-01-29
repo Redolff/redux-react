@@ -4,13 +4,14 @@ import { mat, mac, asyncMac, makeFetchingReducer, makeSetReducer, reduceReducers
 const asyncTodos = mat('todos')
 
 const [setPending, setFullfiled, setError] = asyncMac(asyncTodos)
-export const setComplete = mac('todo/complete', 'payload')
+export const setComplete = mac('todo/complete', 'payload', 'Tareas completadas: ')
 export const setFilter = mac('filter/set', 'payload')
 
 export const fetchThunk = () => async dispatch => {
     dispatch(setPending())
+    const url = 'https://jsonplaceholder.typicode.com/todos'
     try{
-        const response = await fetch('https://jsonplaceholder.typicode.com/todos')
+        const response = await fetch(url)
         const data = await response.json()
         const todos = data.slice(0, 10)
         dispatch(setFullfiled(todos))

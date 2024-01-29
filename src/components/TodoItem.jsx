@@ -5,7 +5,7 @@ const TodoItem = ({ todo }) => {
     const dispatch = useDispatch()
 
     return (
-        <li
+        <li className="list-group-item"
             style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
             onClick={() => dispatch(setComplete(todo))}
         > 
